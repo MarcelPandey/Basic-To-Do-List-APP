@@ -10,6 +10,7 @@ Alur dan pembagian tugas :
 2. ⁠Glenn = mengerjakan bagian penambahan task, penentuan button prioritas, button tambah, dan status task 
 3. ⁠Marcel = mengerjakan bagian unfinished task, bisa mengubah task menjadi 'selesai’ , mengedit task, dan menghapus task
 
+
 1. Memasukkan Nama Task
 
 * Widget: EditText untuk memasukkan nama task.
