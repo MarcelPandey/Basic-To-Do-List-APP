@@ -31,8 +31,9 @@
         android:layout_height="wrap_content"
         android:text="Edit"
         android:minWidth="0dp"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintStart_toEndOf="@id/namaTask"
         app:layout_constraintEnd_toStartOf="@+id/btnHapus"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
@@ -43,8 +44,9 @@
         android:layout_height="wrap_content"
         android:text="Hapus"
         android:minWidth="0dp"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintStart_toEndOf="@id/btnEdit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
