@@ -57,17 +57,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // Simpan List Task
         outState.putSerializable(KEY_LIST_UNDER5, listUnder5);
         outState.putSerializable(KEY_LIST_UNDER7, listUnder7);
         outState.putSerializable(KEY_LIST_FINISHED, listFinished);
 
-        // Simpan Jumlah Counter
         outState.putInt(KEY_COUNT_PRIORITAS, countPrioritas);
         outState.putInt(KEY_COUNT_MEDIUM, countMedium);
         outState.putInt(KEY_COUNT_SANTAI, countSantai);
 
-        // Simpan Data Tanggal Dipilih
         outState.putInt(KEY_SELISIH_HARI, selisihHariDipilih);
         outState.putString(KEY_TEKS_TANGGAL, btnTanggal.getText().toString());
     }
@@ -143,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         rvUnder7.setLayoutManager(new LinearLayoutManager(this));
         rvFinished.setLayoutManager(new LinearLayoutManager(this));
 
+
         adapterUnder5 = new TaskAdapter(listUnder5, new TaskAdapter.OnTaskChangeListener() {
             @Override
             public void onCheckChanged(int position) {
@@ -153,7 +151,11 @@ public class MainActivity extends AppCompatActivity {
                 adapterUnder5.notifyDataSetChanged();
                 adapterFinished.notifyDataSetChanged();
             }
+            public void onEdit(int position, Task task) {
+                showEditDialog(task, () -> adapterUnder5.notifyDataSetChanged());
+            }
         });
+
 
         adapterUnder7 = new TaskAdapter(listUnder7, new TaskAdapter.OnTaskChangeListener() {
             @Override
@@ -165,6 +167,10 @@ public class MainActivity extends AppCompatActivity {
                 adapterUnder7.notifyDataSetChanged();
                 adapterFinished.notifyDataSetChanged();
             }
+
+            public void onEdit(int position, Task task) {
+                showEditDialog(task, () -> adapterUnder7.notifyDataSetChanged());
+            }
         });
 
         adapterFinished = new TaskAdapter(listFinished, new TaskAdapter.OnTaskChangeListener() {
@@ -172,10 +178,22 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckChanged(int position) {
                 Task task = listFinished.remove(position);
                 task.setFinished(false);
-                listUnder5.add(task);
+
+                // Kembalik ke list aktif berdasarkan jumlah hari task tersebut
+                if (task.getJumlahHari() < 5) {
+                    listUnder5.add(task);
+                    adapterUnder5.notifyDataSetChanged();
+                } else {
+                    listUnder7.add(task);
+                    adapterUnder7.notifyDataSetChanged();
+                }
 
                 adapterFinished.notifyDataSetChanged();
-                adapterUnder5.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onEdit(int position, Task task) {
+                showEditDialog(task, () -> adapterFinished.notifyDataSetChanged());
             }
         });
 
@@ -257,9 +275,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Panggil dipaling bawah metode onCreate()
         if (savedInstanceState != null) {
             pulihkanData(savedInstanceState);
         }
+    }
+
+    // dialog button
+    private void showEditDialog(Task task, Runnable onUpdated) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Edit Nama Task");
+
+        final EditText input = new EditText(this);
+        input.setText(task.getNamaTask());
+        input.setSelection(task.getNamaTask().length());
+        builder.setView(input);
+
+        builder.setPositiveButton("Simpan", (dialog, which) -> {
+            String newName = input.getText().toString().trim();
+            if (!newName.isEmpty()) {
+                task.setNamaTask(newName);
+                onUpdated.run(); // Refresh adapter
+                Toast.makeText(this, "Task berhasil diubah", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Nama task tidak boleh kosong", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        builder.setNegativeButton("Batal", (dialog, which) -> dialog.cancel());
+
+        builder.show();
     }
 }

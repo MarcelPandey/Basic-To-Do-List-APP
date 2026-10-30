@@ -3,6 +3,7 @@ package com.example.uts;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -15,6 +16,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     public interface OnTaskChangeListener {
         void onCheckChanged(int position);
+        void onEdit(int position, Task task);
+
     }
 
     private final ArrayList<Task> listTask;
@@ -52,17 +55,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public int getItemCount() {
+
         return listTask.size();
     }
 
     class TaskViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkTask;
         TextView namaTask;
+        Button btnEdit ;
+
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
             checkTask = itemView.findViewById(R.id.checkTask);
             namaTask = itemView.findViewById(R.id.namaTask);
+            btnEdit = itemView.findViewById(R.id.btnEdit);
 
             checkTask.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -70,6 +77,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION && listener != null) {
                         listener.onCheckChanged(pos);
+                    }
+                }
+            });
+
+            btnEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION && listener != null) {
+                        listener.onEdit(pos, listTask.get(pos));
                     }
                 }
             });
