@@ -20,6 +20,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Calendar;
+import android.content.SharedPreferences;
+import android.util.Base64;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -108,6 +116,58 @@ public class MainActivity extends AppCompatActivity {
         btnTanggal.setText(teksTanggal);
     }
 
+    public String ubahKeString(ArrayList<Task> list) {
+        try {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            ObjectOutputStream objectOutput = new ObjectOutputStream(output);
+            objectOutput.writeObject(list);
+            objectOutput.close();
+            return Base64.encodeToString(output.toByteArray(), Base64.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private ArrayList<Task> ubahKeList(String data) {
+        try {
+            if (data.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            byte[] bytes = Base64.decode(data, Base64.DEFAULT);
+
+            ObjectInputStream input = new ObjectInputStream(new ByteArrayInputStream(bytes));
+
+            ArrayList<Task> list = (ArrayList<Task>) input.readObject();
+
+            input.close();
+            return list;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+
+    private void simpanData() {
+        SharedPreferences prefs = getSharedPreferences("DataToDoList", MODE_PRIVATE);
+
+        prefs.edit()
+                .putString("listUnder5", ubahKeString(listUnder5))
+                .putString("listUnder7", ubahKeString(listUnder7))
+                .putString("listFinished", ubahKeString(listFinished))
+                .putInt("countPrioritas", countPrioritas)
+                .putInt("countMedium", countMedium)
+                .putInt("countSantai", countSantai)
+                .putInt("selisihHari", selisihHariDipilih)
+                .putString("teksTanggal", btnTanggal.getText().toString())
+                .apply();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
                 adapterUnder5.notifyDataSetChanged();
                 adapterFinished.notifyDataSetChanged();
+                simpanData();
             }
             public void onEdit(int position, Task task) {
                 showEditDialog(task, () -> adapterUnder5.notifyDataSetChanged());
@@ -174,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
                 adapterUnder7.notifyDataSetChanged();
                 adapterFinished.notifyDataSetChanged();
+                simpanData();
             }
 
             public void onEdit(int position, Task task) {
@@ -205,6 +267,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 adapterFinished.notifyDataSetChanged();
+                simpanData();
             }
 
             @Override
@@ -242,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
                         selisihHariDipilih = (int) (diff / (1000 * 60 * 60 * 24)) + 1;
 
                         btnTanggal.setText(selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear);
+                        simpanData();
                     }
                 }, year, month, day);
 
@@ -295,12 +359,56 @@ public class MainActivity extends AppCompatActivity {
                 textInput.setText("");
                 btnTanggal.setText("Pilih tanggal");
                 selisihHariDipilih = 0;
+
+                simpanData();
             }
         });
 
-        if (savedInstanceState != null) {
-            pulihkanData(savedInstanceState);
-        }
+        muatData();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        simpanData();
+    }
+
+    private void muatData() {
+        SharedPreferences prefs =
+                getSharedPreferences("DataToDoList", MODE_PRIVATE);
+
+        listUnder5.clear();
+        listUnder5.addAll(
+                ubahKeList(prefs.getString("listUnder5", ""))
+        );
+
+        listUnder7.clear();
+        listUnder7.addAll(
+                ubahKeList(prefs.getString("listUnder7", ""))
+        );
+
+        listFinished.clear();
+        listFinished.addAll(
+                ubahKeList(prefs.getString("listFinished", ""))
+        );
+
+        countPrioritas = prefs.getInt("countPrioritas", 0);
+        countMedium = prefs.getInt("countMedium", 0);
+        countSantai = prefs.getInt("countSantai", 0);
+
+        selisihHariDipilih = prefs.getInt("selisihHari", 0);
+
+        btnTanggal.setText(
+                prefs.getString("teksTanggal", "Pilih tanggal")
+        );
+
+        angkaPrioritas.setText(String.valueOf(countPrioritas));
+        angkaMedium.setText(String.valueOf(countMedium));
+        angkaSantai.setText(String.valueOf(countSantai));
+
+        adapterUnder5.notifyDataSetChanged();
+        adapterUnder7.notifyDataSetChanged();
+        adapterFinished.notifyDataSetChanged();
     }
 
     // dialog button
@@ -318,6 +426,7 @@ public class MainActivity extends AppCompatActivity {
             if (!newName.isEmpty()) {
                 task.setNamaTask(newName);
                 onUpdated.run(); // Refresh adapter
+                simpanData();
                 Toast.makeText(this, "Task berhasil diubah", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Nama task tidak boleh kosong", Toast.LENGTH_SHORT).show();
