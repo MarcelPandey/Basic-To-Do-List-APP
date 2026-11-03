@@ -154,6 +154,14 @@ public class MainActivity extends AppCompatActivity {
             public void onEdit(int position, Task task) {
                 showEditDialog(task, () -> adapterUnder5.notifyDataSetChanged());
             }
+
+            public void onDelete(int position, Task task){
+                listUnder5.remove(position);
+                adapterUnder5.notifyDataSetChanged();
+
+                kurangiCounter(task.getPriority());
+                Toast.makeText(MainActivity.this,"Task mu dihapus", Toast.LENGTH_SHORT).show();
+            }
         });
 
 
@@ -170,6 +178,14 @@ public class MainActivity extends AppCompatActivity {
 
             public void onEdit(int position, Task task) {
                 showEditDialog(task, () -> adapterUnder7.notifyDataSetChanged());
+            }
+
+            public void onDelete(int position, Task task){
+                listUnder7.remove(position);
+                adapterUnder7.notifyDataSetChanged();
+
+                kurangiCounter(task.getPriority());
+                Toast.makeText(MainActivity.this,"Task mu dihapus", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -194,6 +210,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onEdit(int position, Task task) {
                 showEditDialog(task, () -> adapterFinished.notifyDataSetChanged());
+            }
+            public void onDelete(int position, Task task){
+                listFinished.remove(position);
+                adapterFinished.notifyDataSetChanged();
+
+                kurangiCounter(task.getPriority());
+                Toast.makeText(MainActivity.this,"Task mu dihapus", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -304,5 +327,18 @@ public class MainActivity extends AppCompatActivity {
         builder.setNegativeButton("Batal", (dialog, which) -> dialog.cancel());
 
         builder.show();
+    }
+
+    private void kurangiCounter(String priority) {
+        if ("Prioritas".equalsIgnoreCase(priority) && countPrioritas > 0) {
+            countPrioritas--;
+            angkaPrioritas.setText(String.valueOf(countPrioritas));
+        } else if ("Medium".equalsIgnoreCase(priority) && countMedium > 0) {
+            countMedium--;
+            angkaMedium.setText(String.valueOf(countMedium));
+        } else if ("Santai".equalsIgnoreCase(priority) && countSantai > 0) {
+            countSantai--;
+            angkaSantai.setText(String.valueOf(countSantai));
+        }
     }
 }

@@ -16,7 +16,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     public interface OnTaskChangeListener {
         void onCheckChanged(int position);
+
         void onEdit(int position, Task task);
+
+        void onDelete(int position, Task task);
 
     }
 
@@ -62,7 +65,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     class TaskViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkTask;
         TextView namaTask;
-        Button btnEdit ;
+        Button btnEdit;
+        Button btnDelete;
 
 
         TaskViewHolder(@NonNull View itemView) {
@@ -70,6 +74,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             checkTask = itemView.findViewById(R.id.checkTask);
             namaTask = itemView.findViewById(R.id.namaTask);
             btnEdit = itemView.findViewById(R.id.btnEdit);
+            btnDelete = itemView.findViewById(R.id.btnHapus);
 
             checkTask.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -90,6 +95,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     }
                 }
             });
+
+            btnDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION && listener != null) {
+                        listener.onDelete(pos, listTask.get(pos));
+                    }
+                }
+            });
+
+
         }
     }
 }
